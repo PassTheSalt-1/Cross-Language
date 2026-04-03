@@ -8,13 +8,12 @@ typedef struct {
     int rss_kb;
 } ProcessInfo;
 
-// Function that returns a struct
-ProcessInfo get_process_info(int pid) {
-    ProcessInfo p;
+//fill buffer with dummy data
 
-    p.pid = pid;
-    p.uid = pid % 1000;
-    p.rss_kb = pid * 2;
-
-    return p;
+void get_processes(ProcessInfo *buffer, int count) {
+    for (int i = 0; i < count; i++) {
+        buffer[i].pid = 1000 + 1;
+        buffer[i].uid = i % 2 == 0 ? 0 : 1000; // alternate root/non-root
+        buffer[i].rss_kb = (i + 1) * 512;
+    }
 }

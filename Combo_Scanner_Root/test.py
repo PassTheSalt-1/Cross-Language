@@ -12,14 +12,65 @@ class ProcessInfo(ctypes.Structure):
 
 lib = ctypes.CDLL("./libprocess.so")
 
-## Explictly tell python the return type
-lib.get_process_info.argtypes = [ctypes.c_int]
-lib.get_process_info.restype = ProcessInfo
+## Define the function signature
+lib.get_processes.argtypes = [ctypes.POINTER(ProcessInfo), ctypes.c_int]
+lib.get_processes.restype = None
+
+#ALLOCATE THE BUFFER OR CREATE THE MEMORY
+count = 5
+ProcessArray = ProcessInfo * count
+buffer = ProcessArray()
+
 
 ##Call the function
+lib.get_processes(buffer, count)
 
-p = lib.get_process_info(42)
+process_list = [] 
 
-print("PID",p.pid)
-print("UID",p.uid)
-print("RSS_KB",p.rss_kb)
+for i in range(count):
+    p = buffer [i]
+    process_list.append({
+        "pid":p.pid,
+        "uid":p.uid,
+        "is_root":(p.uid == 0),
+        "rss_kb":p.rss_kb
+    })
+
+def format_table(process_list:list) -> str:
+    lines = []
+    pid_width = max(len("PID"),
+                max(len(str(p["pid"])) for p in process_list)
+    )
+    # name_width = max(len("NAME"),
+    #             max(len(p["name"]) for p in process_list)
+    # )
+
+    uid_width = max(len("UID"),
+                max(len(str(p["uid"])) for p in process_list)
+    )
+    rss_width = max(len("RSS_WIDTH"),
+                max(len(str(p["rss_kb"])) for p in process_list)
+    )
+
+    header = (
+        f"{'PID':<{pid_width}}  "
+        # f"{'NAME':<{name_width}}  "
+        f"{'UID':<{uid_width}}  "
+        f"{'RSS_KB':<{rss_width}}  "
+    
+    )
+    lines.append(header)
+    lines.append("-" * len(header))
+
+    for process in process_list:
+        row = (
+            f"{process['pid']:<{pid_width}}  "
+            # f"{process['name']:<{name_width}}  "
+            f"{process['uid']:<{uid_width}}  "
+            f"{process['rss_kb']:<{rss_width}}"
+        )
+        lines.append(row)
+
+    return "\n".join(lines)
+
+print(format_table(process_list))
