@@ -1,0 +1,7 @@
+[package]
+name = "process_lib" 
+[lib]
+name = "process_lib"
+crate-type = ["cdylib"]
+
+[dependencies]

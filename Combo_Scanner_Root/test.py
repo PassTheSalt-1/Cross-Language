@@ -68,7 +68,7 @@ def format_table(process_list:list) -> str:
 def main():
     process_list = [] 
 
-    lib = ctypes.CDLL("./libprocess.so")
+    lib = ctypes.CDLL("./process_lib/target/release/libprocess_lib.so")
 
     ## Define the function signature
     lib.get_processes.argtypes = [ctypes.POINTER(ProcessInfo), ctypes.c_int]
