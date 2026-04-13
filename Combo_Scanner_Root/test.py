@@ -12,6 +12,12 @@ class ProcessInfo(ctypes.Structure):
         ("rss_kb", ctypes.c_int),
     ]
 
+class Policy(ctypes.Structure):
+    _fields_ = [
+        ("enforce_non_negative_rss", ctypes.c_bool),
+        ("normalize_uid", ctypes.c_bool),
+    ]
+
 @dataclass
 
 class PyProcess:
@@ -71,8 +77,14 @@ def main():
     lib = ctypes.CDLL("./process_lib/target/release/libprocess_lib.so")
 
     ## Define the function signature
-    lib.get_processes.argtypes = [ctypes.POINTER(ProcessInfo), ctypes.c_int]
+    lib.get_processes.argtypes = [ctypes.POINTER(ProcessInfo), ctypes.c_int, Policy]
     lib.get_processes.restype = None
+
+    ##Create policy instance
+    policy = Policy(
+        True,
+        True
+    )
 
     #ALLOCATE THE BUFFER OR CREATE THE MEMORY
     count = 5
@@ -81,7 +93,7 @@ def main():
 
 
     ##Call the function
-    lib.get_processes(buffer, count)
+    lib.get_processes(buffer, count, policy)
     for i in range(count):
         p = buffer[i]
         process_list.append(
